@@ -1,83 +1,16 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import styled from "styled-components";
-import Logo from "./Logo";
+import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { SnackbarProvider, useSnackbar } from 'notistack'
 import axios from 'axios'
-import { registerRoute } from "../../../RealTimeChatApp-Backend/utils/apiRoutes";
 
 
-// const FormContainer = styled.div`
-// //   height: 100vh;
-//   width: 100vw;
-//   display: flex;
-//   flex-direction: column;
-//   justify-content: center;
-//   gap: 1rem;
-//   align-items: center;
-//   background-color: #131324;
-//   .brand {
-//     display: flex;
-//     align-items: center;
-//     gap: 1rem;
-//     justify-content: center;
-//     img {
-//       height: 5rem;
-//     }
-//     h1 {
-//       color: white;
-//       text-transform: uppercase;
-//     }
-//   }
 
-//   form {
-//     display: flex;
-//     flex-direction: column;
-//     gap: 2rem;
-//     background-color: #00000076;
-//     border-radius: 2rem;
-//     padding: 3rem 5rem;
-//   }
-//   input {
-//     background-color: transparent;
-//     padding: 1rem;
-//     border: 0.1rem solid #4e0eff;
-//     border-radius: 0.4rem;
-//     color: white;
-//     width: 100%;
-//     font-size: 1rem;
-//     &:focus {
-//       border: 0.1rem solid #997af0;
-//       outline: none;
-//     }
-//   }
-//   button {
-//     background-color: #4e0eff;
-//     color: white;
-//     padding: 1rem 2rem;
-//     border: none;
-//     font-weight: bold;
-//     cursor: pointer;
-//     border-radius: 0.4rem;
-//     font-size: 1rem;
-//     text-transform: uppercase;
-//     &:hover {
-//       background-color: #4e0eff;
-//     }
-//   }
-//   span {
-//     color: white;
-//     text-transform: uppercase;
-//     a {
-//       color: #4e0eff;
-//       text-decoration: none;
-//       font-weight: bold;
-//     }
-//   }
-// `;
 
 const Register = () => {
+
+    const navigate = useNavigate()
+
     const { enqueueSnackbar } = useSnackbar()
     const [formData, setFormData] = useState({
         username: "",
@@ -119,15 +52,24 @@ const Register = () => {
         }
 
         try {
-            await axios.post(`http://localhost:5000/api/real-time-chat-app/${registerRoute}`, formData)
+            await axios.post(`http://localhost:5000/api/real-time-chat-app/auth/login/register`, formData)
                 .then((res) => {
-                    if (res.status == '200' || res.status == '201') {
+                    if (res.status == '200' || res.status == '201' || res) {
                         enqueueSnackbar("User have been registered successfully", { variant: "success" })
+                        setFormData({
+                            username: "",
+                            email: "",
+                            password: "",
+                            confirmPassword: ""
+                        })
+                        navigate('/')
                         return true
+                    } else {
+                        enqueueSnackbar(`${res.message}`, { variant: "error" })
                     }
                 })
                 .catch((err) => {
-                    enqueueSnackbar("Error while Registering", { variant: "error" })
+                    enqueueSnackbar(`${err}`, { variant: "error" })
                     console.log(err)
                     return false
                 })
@@ -151,7 +93,7 @@ const Register = () => {
 
                         <img src={logo} className="h-[5rem] md:ml-24 ml-[4.5rem]" alt="Logo" />
 
-                        <h1 className="uppercase text-4xl my-2 mt-4  font-semibold">Chatsapp</h1>
+                        <h1 className=" text-4xl my-2 mt-4  font-semibold">ChatsApp</h1>
                     </div>
                     <div className="text-center">
                         <input
