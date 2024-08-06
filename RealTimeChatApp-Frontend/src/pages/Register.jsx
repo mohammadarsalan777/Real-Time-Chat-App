@@ -1,33 +1,213 @@
-import React from 'react'
-import styled from 'styled-components'
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import styled from "styled-components";
+import Logo from "./Logo";
+import logo from "../assets/logo.png";
+import { SnackbarProvider, useSnackbar } from 'notistack'
+import axios from 'axios'
+import { registerRoute } from "../../../RealTimeChatApp-Backend/utils/apiRoutes";
 
-const FormContainer = styled``
+
+// const FormContainer = styled.div`
+// //   height: 100vh;
+//   width: 100vw;
+//   display: flex;
+//   flex-direction: column;
+//   justify-content: center;
+//   gap: 1rem;
+//   align-items: center;
+//   background-color: #131324;
+//   .brand {
+//     display: flex;
+//     align-items: center;
+//     gap: 1rem;
+//     justify-content: center;
+//     img {
+//       height: 5rem;
+//     }
+//     h1 {
+//       color: white;
+//       text-transform: uppercase;
+//     }
+//   }
+
+//   form {
+//     display: flex;
+//     flex-direction: column;
+//     gap: 2rem;
+//     background-color: #00000076;
+//     border-radius: 2rem;
+//     padding: 3rem 5rem;
+//   }
+//   input {
+//     background-color: transparent;
+//     padding: 1rem;
+//     border: 0.1rem solid #4e0eff;
+//     border-radius: 0.4rem;
+//     color: white;
+//     width: 100%;
+//     font-size: 1rem;
+//     &:focus {
+//       border: 0.1rem solid #997af0;
+//       outline: none;
+//     }
+//   }
+//   button {
+//     background-color: #4e0eff;
+//     color: white;
+//     padding: 1rem 2rem;
+//     border: none;
+//     font-weight: bold;
+//     cursor: pointer;
+//     border-radius: 0.4rem;
+//     font-size: 1rem;
+//     text-transform: uppercase;
+//     &:hover {
+//       background-color: #4e0eff;
+//     }
+//   }
+//   span {
+//     color: white;
+//     text-transform: uppercase;
+//     a {
+//       color: #4e0eff;
+//       text-decoration: none;
+//       font-weight: bold;
+//     }
+//   }
+// `;
 
 const Register = () => {
-    const handleSubmit = (e) => {
-        e.preventDefault()
-        alert('form')
-    }
+    const { enqueueSnackbar } = useSnackbar()
+    const [formData, setFormData] = useState({
+        username: "",
+        email: "",
+        password: "",
+        confirmPassword: ""
+
+    })
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (formData.username === '' || formData.email === '' || formData.password === '') {
+            enqueueSnackbar("Each field is required", { variant: "error" })
+            return false
+        }
+
+        else if (!formData.username.includes('@')) {
+            enqueueSnackbar("Enter a valid Username. It should contain '@'", { variant: "warning" })
+            return false
+        }
+        else if (!formData.username.length > 5) {
+            enqueueSnackbar("Username should contain more than 7 characters", { variant: "warning" })
+            return false
+        }
+
+        else if (!formData.email.includes('@') || !formData.email.includes('.')) {
+            enqueueSnackbar("Enter a valid Email", { variant: "warning" })
+            return false
+        }
+
+        else if (formData.password.length < 8) {
+            enqueueSnackbar("Password should contain more than 7 character", { variant: "warning" })
+            return false
+        }
+
+        else if (formData.password !== formData.confirmPassword) {
+            enqueueSnackbar("Password and Confirm Password should be same", { variant: "warning" })
+            return false
+        }
+
+        try {
+            await axios.post(`http://localhost:5000/api/real-time-chat-app/${registerRoute}`, formData)
+                .then((res) => {
+                    if (res.status == '200' || res.status == '201') {
+                        enqueueSnackbar("User have been registered successfully", { variant: "success" })
+                        return true
+                    }
+                })
+                .catch((err) => {
+                    enqueueSnackbar("Error while Registering", { variant: "error" })
+                    console.log(err)
+                    return false
+                })
+        } catch (error) {
+            enqueueSnackbar("Internal server error", { variant: "error" })
+            console.log(error)
+            return false
+        }
+    };
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value })
+    };
     return (
-        <>
-            <FormContainer>
-                <form onSubmit={(e) => handleSubmit(e)}>
-                    <div className="brand">
-                        <img src="" alt="" />
-                        <h1>Chatter</h1>
+        <SnackbarProvider maxSnack={3} >
+            <div className="md:flex md:justify-center md:align-middle py-5  m-auto h-[100vh]  ">
+
+                <form className="  md:w-[30%] p-10 bg-[#030712] rounded-xl  shadow-xl" onSubmit={(e) => handleSubmit(e)}>
+                    <div className="text-center">
+
+
+                        <img src={logo} className="h-[5rem] md:ml-24 ml-[4.5rem]" alt="Logo" />
+
+                        <h1 className="uppercase text-4xl my-2 mt-4  font-semibold">Chatsapp</h1>
+                    </div>
+                    <div className="text-center">
+                        <input
+                            type="text"
+                            name="username"
+                            placeholder="Username"
+                            onChange={(e) => handleChange(e)}
+                            className="my-3 h-12 md:w-[80%] w-full bg-gray-900 border px-3 rounded-md "
+
+                        />
                     </div>
 
-                    <input type="text" name="username" placeholder='Username' />
-                    <input type="text" name="email" placeholder='Email' />
-                    <input type="password" name="password" placeholder='Password' />
-                    <input type="text" name="confirm-password" placeholder='Confirm Password' />
+                    <div className="text-center">
+                        <input
+                            type="text"
+                            name="email"
+                            placeholder="Email"
+                            onChange={(e) => handleChange(e)}
+                            className="my-3 h-12 md:w-[80%] w-full bg-gray-900 border px-3 rounded-md "
 
+                        />
+                    </div>
 
+                    <div className="text-center">
+                        <input
+                            type="password"
+                            name="password"
+                            placeholder="Password"
+                            onChange={(e) => handleChange(e)}
+                            className="my-3 h-12 md:w-[80%] w-full bg-gray-900 border px-3 rounded-md "
+
+                        />
+                    </div>
+
+                    <div className="text-center">
+                        <input
+                            type="password"
+                            name="confirmPassword"
+                            placeholder="Confirm Password"
+                            onChange={(e) => handleChange(e)}
+                            className="my-3 h-12 md:w-[80%] w-full bg-gray-900 border px-3 rounded-md "
+
+                        />
+                    </div>
+                    <div className="text-center">
+
+                        <button className="bg-[#0738dc] mt-2 mb-1 text-center w-[80%] text-white h-12 px-8 font-bold cursor-pointer rounded-md text-base uppercase hover:bg-[#05289c] hover:text-black shadow-2xl" type="submit">Create User</button>
+                        <span className="block font-medium text-slate-500 my-2 ">
+                            Already have account ? <Link className="text-[#0738dc]" to={"/login"}>Login</Link>
+                        </span>
+                    </div>
                 </form>
 
-            </FormContainer>
-        </>
-    )
-}
+            </div >
+        </SnackbarProvider>
+    );
+};
 
-export default Register
+export default Register;
