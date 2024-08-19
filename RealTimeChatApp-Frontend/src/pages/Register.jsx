@@ -20,6 +20,14 @@ const Register = () => {
 
     })
 
+    const [showPassword, setShowPassword] = useState(false)
+
+    const handleShowPassword = () => {
+        setShowPassword(!showPassword)
+    }
+
+    const show = showPassword ? "text" : "password"
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (formData.username === '' || formData.email === '' || formData.password === '') {
@@ -52,9 +60,11 @@ const Register = () => {
         }
 
         try {
+            console.log(formData)
             await axios.post(`http://localhost:5000/api/real-time-chat-app/auth/login/register`, formData)
                 .then((res) => {
-                    if (res.status == '200' || res.status == '201' || res) {
+                    if (res.status === 200 || res.status === 201) {
+
                         enqueueSnackbar("User have been registered successfully", { variant: "success" })
                         setFormData({
                             username: "",
@@ -62,6 +72,7 @@ const Register = () => {
                             password: "",
                             confirmPassword: ""
                         })
+                        localStorage.setItem('chatsapp-user', JSON.stringify(res.data))
                         navigate('/')
                         return true
                     } else {
@@ -119,25 +130,28 @@ const Register = () => {
 
                     <div className="text-center">
                         <input
-                            type="password"
+                            type={show}
                             name="password"
                             placeholder="Password"
                             onChange={(e) => handleChange(e)}
                             className="my-3 h-12 md:w-[80%] w-full bg-gray-900 border px-3 rounded-md "
 
                         />
+
                     </div>
 
                     <div className="text-center">
                         <input
-                            type="password"
+                            type={show}
                             name="confirmPassword"
                             placeholder="Confirm Password"
                             onChange={(e) => handleChange(e)}
                             className="my-3 h-12 md:w-[80%] w-full bg-gray-900 border px-3 rounded-md "
 
                         />
+
                     </div>
+
                     <div className="text-center">
 
                         <button className="bg-[#0738dc] mt-2 mb-1 text-center w-[80%] text-white h-12 px-8 font-bold cursor-pointer rounded-md text-base uppercase hover:bg-[#05289c] hover:text-black shadow-2xl" type="submit">Create User</button>
